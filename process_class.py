@@ -17,7 +17,7 @@ class Process:
         self.turnaround_time: float = None
 
     def __str__(self) -> str:
-        return f"Process #{self.pid} requiring {self.footprint}MB memory and {self.cycles} cycles."
+        return f"Process #{self.pid} requiring {self.footprint}MB memory and {self.cycles}*10^6 cycles."
 
     @property
     def next(self) -> Process:

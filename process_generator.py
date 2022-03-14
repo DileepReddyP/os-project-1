@@ -11,7 +11,7 @@
 # def process_generator(k: int):
 #     colnames = ["PID", "Cycles", "Footprint"]
 #     footprints = get_truncated_normal(mean=8*2**10, sd=8*2**10, low=1, upp=16*2**10)
-#     cycles = get_truncated_normal(mean=10e9, sd=10e9, low=10e6, upp=10e12)
+#     cycles = get_truncated_normal(mean=10e3, sd=10e3, low=1, upp=10e6)
 #     cycles_out = floor(cycles.rvs(k)).astype(int)
 #     footprint_out = floor(footprints.rvs(k)).astype(int)
 #     pids = range(10000, 10000+k)
