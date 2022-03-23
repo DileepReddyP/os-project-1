@@ -11,6 +11,7 @@ def fifo():
     processor_chains: List[ProcessChain] = [ProcessChain() for _ in range(6)]
     for i, c_process in enumerate(processes[:6]):
         processor_chains[i].add(process=c_process)
+        c_process.calc()
 
     rem_processes = processes[6:]
     current_time = 0
@@ -24,24 +25,24 @@ def fifo():
             process.cycles_left = process.cycles + process.waiting_time - current_time
         fastest_done_index = processor_chains.index(fastest_done)
         processor_chains[fastest_done_index].add(next_process)
-
+        next_process.calc()
+    print(current_time)
     return processor_chains
 
 
 def sjf():
     "sjf"
     processes: List[Process] = data()
-    processes.sort(key=lambda x: x.cycles) # only change
+    processes.sort(key=lambda x: x.cycles)  # only change
     for process in processes:
         process.arrival_time = 0
     processor_chains: List[ProcessChain] = [ProcessChain() for _ in range(6)]
     for i, c_process in enumerate(processes[:6]):
         processor_chains[i].add(process=c_process)
-
+        c_process.calc()
     rem_processes = processes[6:]
     current_time = 0
     while rem_processes:
-        # this may not be fifo...
         next_process = rem_processes.pop(0)
         fastest_done = min(processor_chains, key=lambda x: x.tail.cycles_left)
         current_time = fastest_done.tail.turnaround_time
@@ -50,7 +51,52 @@ def sjf():
             process.cycles_left = process.cycles + process.waiting_time - current_time
         fastest_done_index = processor_chains.index(fastest_done)
         processor_chains[fastest_done_index].add(next_process)
+        next_process.calc()
+    print(current_time)
+    return processor_chains
 
+
+def r_r():
+    "rr"
+    processes: List[Process] = data()
+    for process in processes:
+        process.arrival_time = 0
+    processor_chains: List[ProcessChain] = [ProcessChain() for _ in range(6)]
+    for i, c_process in enumerate(processes[:6]):
+        processor_chains[i].add(process=c_process)
+    rem_processes = processes[6:]
+    quantum = 1000
+    current_time = [0 for _ in range(6)]
+    while rem_processes:
+        for i, processor_chain in enumerate(processor_chains):
+            process = processor_chain.tail
+            if process.cycles_left <= quantum:
+                current_time[i] += process.cycles_left
+                process.waiting_time = (
+                    current_time[i] - process.cycles + process.cycles_left
+                )
+                process.cycles_left = 0
+                process.turnaround_time = process.waiting_time + process.cycles
+                if rem_processes:
+                    new_process = rem_processes.pop(0)
+                    processor_chains[i].add(new_process)
+            else:
+                current_time[i] += quantum
+                process.cycles_left -= quantum
+                if rem_processes:
+                    processor_chains[i].remove()
+                    rem_processes.append(process)
+                    new_process = rem_processes.pop(0)
+                    processor_chains[i].add(new_process)
+    for i, processor_chain in enumerate(processor_chains):
+        process = processor_chain.tail
+        process.waiting_time = current_time[i] - process.cycles + process.cycles_left
+        process.cycles_left = 0
+        process.turnaround_time = process.waiting_time + process.cycles
+        # process.cycles_left = process.cycles + process.waiting_time - current_time
+        # fastest_done_index = processor_chains.index(fastest_done)
+        # processor_chains[fastest_done_index].add(next_process)
+    print(current_time)
     return processor_chains
 
 
@@ -65,14 +111,16 @@ def evaluation(processor_chains: List[ProcessChain]):
             num_processes += 1
             total_wait += process.waiting_time
             total_turnaround += process.turnaround_time
-        
+
         print(
             f"Processor {index} had {num_processes} processes, avg wait time {total_wait/num_processes:.2f} cycles, avg turnaround time {total_turnaround/num_processes:.2f} cycles"
         )
-        index+=1
+        index += 1
 
 
 print("fifo")
 evaluation(fifo())
 print("sjf")
 evaluation(sjf())
+print("rr")
+evaluation(r_r())

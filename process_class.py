@@ -67,4 +67,17 @@ class ProcessChain(Iterator, Iterable):
         else:
             self.tail.next = process
             self.tail = process
-        process.calc()
+
+    def remove(self) -> Process:
+        "removing from tail"
+        if self.head is None and self.tail is None:
+            return None
+        if self.head is self.tail:
+            process = self.head
+            self.head = None
+            self.tail = None
+            return process
+        process = self.tail
+        process.prev_process.next_process = None
+        self.tail = process.prev_process
+        return process
