@@ -27,6 +27,7 @@ def sjf_big_little():
             slow_fastest_done.tail.cycles_left < fast_fastest_done.tail.cycles_left
         )
         next_process = rem_processes.pop(0) if slow_true else rem_processes.pop()
+        # logic to get from the heavier processes if 4ghz processor is done
         index_done = (
             slow_processor_chains.index(slow_fastest_done)
             if slow_true
@@ -60,6 +61,7 @@ def faster_calc(process: Process) -> None:
     process.calc()
     process.cycles_left //= 2
     process.turnaround_time -= process.cycles // 2
+
 
 def evaluation(processor_chains: List[ProcessChain]):
     "eval"
