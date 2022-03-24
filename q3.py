@@ -3,7 +3,7 @@ from process_class import Process, ProcessChain
 from data_loader import data
 
 
-def sjf_big_little():
+def sjf_big_little_memory():
     "sjf modded"
     processes: List[Process] = data()
     processes.sort(key=lambda x: x.cycles)  # only change between fifo and sjf
@@ -20,13 +20,28 @@ def sjf_big_little():
 
     rem_processes = processes[6:]
     current_time = 0
+    skip_append = False # when true, only 4ghz 16GB processors can run remaining processes
     while rem_processes:
         slow_fastest_done = min(slow_processor_chains, key=lambda x: x.tail.cycles_left)
         fast_fastest_done = min(fast_processor_chains, key=lambda x: x.tail.cycles_left)
         slow_true = (
             slow_fastest_done.tail.cycles_left < fast_fastest_done.tail.cycles_left
-        )
-        next_process = rem_processes.pop(0) if slow_true else rem_processes.pop(0)
+        ) if not skip_append else False
+        next_process = rem_processes.pop(0)
+        curr_len = len(rem_processes)
+        if slow_true:
+            checking = True
+            while checking: # changes process to one with a lower footprint if > max ram of lower
+                if next_process.footprint > 8 * 2**10:
+                    rem_processes.append(next_process)
+                    next_process = rem_processes.pop(0)
+                    curr_len -= 1
+                    if curr_len < 0:
+                        skip_append = True
+                        checking = False
+                        rem_processes.append(next_process)
+                else:
+                    checking = False
         # logic to get from the heavier processes if 4ghz processor is done
         index_done = (
             slow_processor_chains.index(slow_fastest_done)
@@ -41,14 +56,17 @@ def sjf_big_little():
         for processor_chain in slow_processor_chains:
             process = processor_chain.tail
             process.cycles_left = process.cycles + process.waiting_time - current_time
+            if skip_append and process.cycles_left < 0:
+                process.cycles_left = 0
         for processor_chain in fast_processor_chains:
             process = processor_chain.tail
             process.cycles_left = (
                 process.cycles + process.waiting_time - current_time
             ) // 2
         if slow_true:
-            slow_processor_chains[index_done].add(next_process)
-            next_process.calc()
+            if not skip_append:
+                slow_processor_chains[index_done].add(next_process)
+                next_process.calc()
         else:
             fast_processor_chains[index_done].add(next_process)
             faster_calc(next_process)
@@ -81,5 +99,5 @@ def evaluation(processor_chains: List[ProcessChain]):
         index += 1
 
 
-print("sjf_big_little")
-evaluation(sjf_big_little())
+print("sjf_big_little_memory_restricted")
+evaluation(sjf_big_little_memory())
