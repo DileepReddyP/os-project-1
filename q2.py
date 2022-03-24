@@ -26,7 +26,7 @@ def sjf_big_little():
         slow_true = (
             slow_fastest_done.tail.cycles_left < fast_fastest_done.tail.cycles_left
         )
-        next_process = rem_processes.pop(0) if slow_true else rem_processes.pop(0)
+        next_process = rem_processes.pop(0) 
         # logic to get from the heavier processes if 4ghz processor is done
         index_done = (
             slow_processor_chains.index(slow_fastest_done)
