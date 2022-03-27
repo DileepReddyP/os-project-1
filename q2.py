@@ -9,6 +9,7 @@ def sjf_big_little():
     processes.sort(key=lambda x: x.cycles)  # only change between fifo and sjf
     for process in processes:
         process.arrival_time = 0
+    # the slow and fast processors chains are in separate arrays
     slow_processor_chains: List[ProcessChain] = [ProcessChain() for _ in range(3)]
     fast_processor_chains: List[ProcessChain] = [ProcessChain() for _ in range(3)]
     for i, c_process in enumerate(processes[:3]):  # from the start
@@ -16,7 +17,7 @@ def sjf_big_little():
         c_process.calc()
     for i, c_process in enumerate(processes[3:6]):  # from the end
         fast_processor_chains[i].add(process=c_process)
-        faster_calc(c_process)
+        faster_calc(c_process) # because 4ghz is twice as fast
 
     rem_processes = processes[6:]
     current_time = 0
@@ -25,8 +26,8 @@ def sjf_big_little():
         fast_fastest_done = min(fast_processor_chains, key=lambda x: x.tail.cycles_left)
         slow_true = (
             slow_fastest_done.tail.cycles_left < fast_fastest_done.tail.cycles_left
-        )
-        next_process = rem_processes.pop(0) 
+        ) # because different logic used when slower processor is done
+        next_process = rem_processes.pop(0)
         # logic to get from the heavier processes if 4ghz processor is done
         index_done = (
             slow_processor_chains.index(slow_fastest_done)
@@ -45,7 +46,7 @@ def sjf_big_little():
             process = processor_chain.tail
             process.cycles_left = (
                 process.cycles + process.waiting_time - current_time
-            ) // 2
+            ) // 2 # because 4ghz
         if slow_true:
             slow_processor_chains[index_done].add(next_process)
             next_process.calc()

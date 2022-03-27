@@ -17,6 +17,7 @@ class Process:
         self.turnaround_time: float = None
 
     def __str__(self) -> str:
+        # for printing as string
         return f"Process #{self.pid} requiring {self.footprint}MB memory and {self.cycles}*10^6 cycles."
 
     @property
@@ -27,11 +28,14 @@ class Process:
     @next.setter
     def next(self, next_process: Process) -> None:
         "adding next process"
+        # links both the forward and backward refernces in linked list
         next_process.prev_process = self
         self.next_process = next_process
 
     def calc(self):
         "calc"
+        # calculates the waiting time and turnaround time based on previous processs 
+        # in linked list when called
         self.waiting_time = (
             self.prev_process.turnaround_time - self.arrival_time
             if self.prev_process is not None
@@ -49,6 +53,8 @@ class ProcessChain(Iterator, Iterable):
         self.next: Process = None
 
     def __iter__(self):
+        # iter and next are part of iterator and iterable protocols
+        # use to make the chain iterable so that `for process in processor_chain` works
         self.next = self.head
         return self
 
@@ -58,7 +64,8 @@ class ProcessChain(Iterator, Iterable):
             self.next = self.next.next
             return x
         raise StopIteration
-
+    
+    # adding and removing from linked list and node references
     def add(self, process: Process) -> None:
         "adding to chain"
         if self.head is None and self.tail is None:

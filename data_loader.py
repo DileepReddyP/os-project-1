@@ -1,6 +1,7 @@
 import csv
 from process_class import Process
 
+# reads data from CSV and loads into an array of Processes
 
 def data():
     "data"

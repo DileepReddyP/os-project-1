@@ -11,10 +11,10 @@ def sjf_big_little_memory():
         process.arrival_time = 0
     slow_processor_chains: List[ProcessChain] = [ProcessChain() for _ in range(3)]
     fast_processor_chains: List[ProcessChain] = [ProcessChain() for _ in range(3)]
-    for i, c_process in enumerate(processes[:3]):  # from the start
+    for i, c_process in enumerate(processes[:3]):
         slow_processor_chains[i].add(process=c_process)
         c_process.calc()
-    for i, c_process in enumerate(processes[3:6]):  # from the end
+    for i, c_process in enumerate(processes[3:6]):
         fast_processor_chains[i].add(process=c_process)
         faster_calc(c_process)
 
@@ -26,7 +26,7 @@ def sjf_big_little_memory():
         fast_fastest_done = min(fast_processor_chains, key=lambda x: x.tail.cycles_left)
         slow_true = (
             slow_fastest_done.tail.cycles_left < fast_fastest_done.tail.cycles_left
-        ) if not skip_append else False
+        ) if not skip_append else False # if skip_append, 8gb processor cannot do anything
         next_process = rem_processes.pop(0)
         curr_len = len(rem_processes)
         if slow_true:
@@ -37,7 +37,7 @@ def sjf_big_little_memory():
                     next_process = rem_processes.pop(0)
                     curr_len -= 1
                     if curr_len < 0:
-                        skip_append = True
+                        skip_append = True # 2ghz 8gb processors cannot do remaining processes at all
                         checking = False
                         rem_processes.append(next_process)
                 else:
@@ -64,7 +64,7 @@ def sjf_big_little_memory():
                 process.cycles + process.waiting_time - current_time
             ) // 2
         if slow_true:
-            if not skip_append:
+            if not skip_append: # too much caution
                 slow_processor_chains[index_done].add(next_process)
                 next_process.calc()
         else:
@@ -77,7 +77,7 @@ def sjf_big_little_memory():
 def faster_calc(process: Process) -> None:
     "calc for 4ghz processor"
     process.calc()
-    process.cycles_left //= 2
+    process.cycles_left //= 2 # integer division because values have been ints until now
     process.turnaround_time -= process.cycles // 2
 
 

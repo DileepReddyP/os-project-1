@@ -5,7 +5,7 @@ from data_loader import data
 
 def fifo_big_little_memory():
     "fifo modded"
-    processes: List[Process] = data() # no sort
+    processes: List[Process] = data() # no sort, only change from q3
     for process in processes:
         process.arrival_time = 0
     slow_processor_chains: List[ProcessChain] = [ProcessChain() for _ in range(3)]
